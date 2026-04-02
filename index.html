@@ -1,1 +1,382 @@
+<!DOCTYPE html>
+<html lang="lo">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Degree Project Presentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --text-color: #333;
+            --bg-color: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Noto Sans Lao', sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #slide-container {
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 50px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            grid-template-columns: 1fr 1fr;
+            /* Text Left, Image Right */
+            grid-template-rows: auto 1fr auto;
+            gap: 30px;
+        }
+
+        .slide.active {
+            display: grid;
+            opacity: 1;
+        }
+
+        .slide-header {
+            grid-column: 1 / -1;
+            grid-row: 1;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.8rem;
+            text-align: center;
+            margin-top: 0;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 2.2rem;
+            border-bottom: 4px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .content-text {
+            grid-column: 1;
+            font-size: 1.5rem;
+            line-height: 1.7;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .content-visual {
+            grid-column: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #eee;
+            /* Optional border for image area */
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .content-visual img {
+            width: 100%;
+            /* ໃຫ້ຮູບກວ້າງເຕັມເນື້ອທີ່ເບື້ອງຂວາ */
+            max-height: 450px; /* ປັບຄວາມສູງໃຫ້ເໝາະສົມສຳລັບຮູບປະກອບ */
+            /* ຈຳກັດຄວາມສູງບໍ່ໃຫ້ລົ້ນ Slide */
+            object-fit: contain;
+            /* ຮັກສາສັດສ່ວນຮູບບໍ່ໃຫ້ເພ້ */
+            border-radius: 8px;
+            /* ເຮັດໃຫ້ມຸມຮູບມົນເລັກນ້ອຍ */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            /* ເພີ່ມເງົາໃຫ້ຮູບເບິ່ງລອຍອອກມາ */
+        }
+
+        .image-caption {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+
+        }
+
+        .slide-footer {
+            grid-column: 1 / -1;
+            grid-row: 3;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        button.nav-btn {
+            padding: 12px 25px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        button.nav-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        button.nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* ປັບປຸງ Style ສຳລັບ Title Slide ໃໝ່ */
+        .title-slide {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            /* ປ່ຽນກັບມາເປັນ 2 ຄໍລຳ ເພື່ອໃສ່ຮູບ */
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+        }
+
+        .title-slide h1 {
+            color: white;
+            margin-bottom: 20px;
+            text-align: left; /* ປ່ຽນໃຫ້ສະແດງເບື້ອງຊ້າຍ */
+            font-size: 2.5rem;
+        }
+
+        .title-slide h3 {
+            font-size: 1.5rem;
+            margin-top: 10px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            color: white;
+        }
+
+        .title-slide hr {
+            width: 100%; /* ໃຫ້ເສັ້ນຍາວເຕັມຄໍລຳຊ້າຍ */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-left: 0;
+        }
+
+        .title-slide .footer-info {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-top: 20px;
+            color: white;
+        }
+        
+        /* ກຳນົດ Caption ສີຂາວສຳລັບໜ້າປົກ */
+        .title-slide .image-caption {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .title-slide .slide-footer {
+            display: none;
+        }
+
+        /* Hide footer on title slide */
+    </style>
+</head>
+
+<body>
+
+    <div id="slide-container">
+        <div class="slide active title-slide">
+            <div class="slide-header">
+                <h1>ການອອກແບບ ແລະ ການຈັດຕັ້ງປະຕິບັດ ລະບົບຄຸ້ມຄອງພາສາ ໃນໜ້າ UI ແບບ Runtime</h1>
+            </div>
+            <div class="content-text">
+                <p style="font-size: 1.2rem;">Design and Implementation of a Dynamic Runtime UI Language Management
+                    System</p>
+                <hr>
+                <h3>ວິທະຍາສາດຄອມພິວເຕີ (Master Degree)</h3>
+                <div class="footer-info">
+                    <p>ນັກສຶກສາ: ວຽງທອງ ຈົ່ງຫວາຊົ່ງ</p>
+                    <p>ອາຈານທີ່ປຶກສາ: ... </p>
+                </div>
+            </div>
+            <div class="content-visual">
+                <img src="images/home1.png" alt="ຮູບພາບປະກອບໜ້າປົກໂຄງການ">
+                <p class="image-caption">ຮູບພາບປະກອບໂຄງການ</p>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-header">
+                <h2>1. ບັນຫາທີ່ພົບ ຫຼື ສີ່ທ້າທາຍ (The Challenges)</h2>
+            </div>
+            <div class="content-text">
+                <ul>
+                    <li><b>Hard-coded strings:</b> ຄຳສັບ (label) ຖືກກຳນົດຕາຍຕົວໃນ Code.</li>
+                    <li><b>ການ Build ລະບົບຄືນ:</b> ທຸກຄັ້ງທີ່ແປໃໝ່ ຫຼືປ່ຽນແປງ ຄຳສັບ ຕ້ອງ Deploy ລະບົບໃໝ່.</li>
+                    <li><b>ຄວາມຊ້ຳຊ້ອນ:</b> ຄຳສັບດຽວກັນຖືກກຳນົດໄວ້ຫຼາຍບ່ອນໃນ Backend.</li>
+                    <li><b>ຄວາມບໍ່ສອດຄ່ອງ:</b> ຂາດມາດຕະຖານການແປ (Technical Terms) ພາຍໃນທີມ.</li>
+                </ul>
+            </div>
+            <div class="content-visual">
+                <img src="images/hard_coded1.png" alt="ແຜນວາດຂັ້ນຕອນການແປແບບດັ້ງເດີມທີ່ຫຍຸ້ງຍາກ">
+                <p class="image-caption">ແຜນວາດສະແດງຂັ້ນຕອນການແປແບບດັ້ງເດີມ</p>
+            </div>
+            <div class="slide-footer">Page 2</div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-header">
+                <h2>2. ຈຸດປະສົງຂອງໂຄງການ (Objectives)</h2>
+            </div>
+            <div class="content-text">
+                <ul>
+                    <li>ອອກແບບ <b>Database Model</b> ທີ່ຮອງຮັບການຂະຫຍາຍຕົວ.</li>
+                    <li>ພັດທະນາ <b>Translation Engine</b> ທີ່ເຮັດວຽກແບບ Runtime.</li>
+                    <li>ສ້າງ <b>Admin Interface</b> ໃຫ້ຜູ້ໃຊ້ທົ່ວໄປສາມາດແກ້ໄຂພາສາໄດ້ເອງ.</li>
+                    <li>ປະເມີນປະສິດທິພາບປຽບທຽບກັບວິທີການແບບດັ້ງເດີມ.</li>
+                </ul>
+            </div>
+            <div class="content-visual">
+                <img src="images/objective1.png" alt="ຕົວຢ່າງ Mockup UI Admin Panel ຈັດການພາສາ">
+                <p class="image-caption">ຕົວຢ່າງ Mockup UI Admin Panel ຈັດການພາສາ</p>
+            </div>
+            <div class="slide-footer">Page 3</div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-header">
+                <h2>3. ໂຄງສ້າງລະບົບ (System Architecture)</h2>
+            </div>
+            <div class="content-text">
+                <ul>
+                    <li><b>[ ຖານຂໍ້ມູນ ]</b>: ເກັບຄຳສັບ (Key) ແລະ ຄຳແປ (Value).</li>
+                    <li><b>[ ການເຊື່ອມຕໍ່ ]</b>: ຮັບຄຳແປຜ່ານ API ຫຼື/ແລະ Server-Client (java RMI).</li>
+                    <li><b>[ ເຄື່ອງມືການແປ ]</b>: ສະແດງ ຄຳສັບໃສ່ UI ແບບ Dynamic (Runtime).</li>
+                    <li><b>[ UI ]</b>: ປ່ຽນແປງ/ປັບປຸງຄຳແປໂດຍບໍ່ຕ້ອງ Re-build.</li>
+                </ul>
+            </div>
+            <div class="content-visual">
+                <img src="images/architecture1.png" alt="ແຜນວາດໂຄງສ້າງ Software (Architecture Diagram)">
+                <p class="image-caption">ໂຄງສ້າງການເຮັດວຽກຂອງລະບົບແບບ Runtime</p>
+            </div>
+            <div class="slide-footer">Page 4</div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-header">
+                <h2>4. ການອອກແບບຖານຂໍ້ມູນ (Database Design) ແລະ ເຕັກໂນໂລຊີ (Technology)</h2>
+            </div>
+            <div class="content-text">
+                <ul>
+                    <li>ທຸກຄຳສັບ (label) ຕ້ອງຈັດເກັບແບບ <b>Single Source of Truth</b>.</li>
+                    <li>ຮອງຮັບການ Reuse ຄຳສັບດຽວກັນໃນທຸກ Module.</li>
+                    <li>ເກັບຂໍ້ມູນ: Language (ID, Code, Font), UI_Keys, Translations (Value).</li>
+                    <li>Technologies: Java-RMI, Java-Swing, Python/Node.js ແລະ Django/react framework.</li>
+                    <li>ຮູບແບບ Application: Web Application ແລະ Windows Application</li>
+                </ul>
+            </div>
+            <div class="content-visual">
+                <img src="images/Single_source3.png" alt="ຕົວຢ່າງ ER Diagram">
+                <p class="image-caption">ແຜນວາດຖານຂໍ້ມູນ (ER Diagram) ທີ່ອອກແບບມາເພື່ອການ Reuse</p>
+            </div>
+            <div class="slide-footer">Page 5</div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-header">
+                <h2>5. ຜົນປະໂຫຍດ ແລະ ການປະເມີນ</h2>
+            </div>
+            <div class="content-text">
+                <ul>
+                    <li>ຄວາມຢືດຢຸ່ນສູງ (High Agility) ໃນການປັບປ່ຽນ ພາສາໃນ UI</li>
+                    <li>ປະຢັດເວລາໃນການແປ, ການພັດພັດທະນາ ແລະ ຫຼຸດຜ່ອນຄ່າໃຊ້ຈ່າຍ</li>
+                    <li>ສະດວກຕໍ່ຜູ້ໃຊ້</li>
+                    <li>ຜູ້ໃຊ້ສາມາດຈັດການ ການແປດ້ວຍຕົນເອງ</li>
+                </ul>
+            </div>
+            <div class="content-visual">
+                <img src="images/lessFund1.png" alt="ແຜນວາດປຽບທຽບ (Comparison Chart)">
+                <p class="image-caption">ກຣາບປຽບທຽບຄວາມໄວ ແລະ ປະສິດທິພາບໃນການເຮັດວຽກ</p>
+            </div>
+            <div class="slide-footer">Page 6</div>
+        </div>
+
+        <div class="slide title-slide" style="grid-template-columns: 1fr;"> <div class="content-full" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: white; grid-column: 1 / -1;">
+                <h1>ຖາມ - ຕອບ (Q&A)</h1>
+                <p style="font-size: 1.5rem; color: white;">ຂໍຂອບໃຈສຳລັບການຮັບຟັງຄຳນຳສະເໜີ.</p>
+                <hr style="border-style: dotted; margin-top: 50px; width: 40%; margin-left: auto; margin-right: auto;">
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="prevBtn" class="nav-btn" onclick="prevSlide()">ກັບຄືນ</button>
+            <button id="nextBtn" class="nav-btn" onclick="nextSlide()">ຕໍ່ໄປ</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function updateButtons() {
+            prevBtn.disabled = (currentSlide === 0);
+            nextBtn.disabled = (currentSlide === slides.length - 1);
+        }
+
+        function showSlide(index) {
+            slides.forEach(s => s.classList.remove('active'));
+            slides[index].classList.add('active');
+            updateButtons();
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "ArrowRight") nextSlide();
+            if (e.key === "ArrowLeft") prevSlide();
+        });
+
+        // Initialize
+        updateButtons();
+    </script>
+</body>
+
+</html>
